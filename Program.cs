@@ -4,7 +4,7 @@
     {
         private static void Main(string[] args)
         {
-            Console.WriteLine("vitej v tvorbe postavy!");
+            Console.WriteLine("Vitej v tvorbe postavy!");
 
             Console.WriteLine("Zadej jmeno postavy:");
             string name = Console.ReadLine();
