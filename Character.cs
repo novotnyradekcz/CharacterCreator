@@ -38,7 +38,17 @@ namespace CharacterCreator
         public void RollAbilityScores()
         {
             Random dice = new Random();
-            dice.Next(7);
+            dice.Next(1, 7);
+        }
+
+        public void ShowAbilityScores()
+        {
+            Console.WriteLine("Sila: {0}", this._strength);
+            Console.WriteLine("Obratnost: {0}", this._dexterity);
+            Console.WriteLine("Odolnost: {0}", this._constitution);
+            Console.WriteLine("Inteligence: {0}", this._intelligence);
+            Console.WriteLine("Moudrost: {0}", this._wisdom);
+            Console.WriteLine("Charisma: {0}", this._charisma);
         }
     }
 }

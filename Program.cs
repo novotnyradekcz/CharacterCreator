@@ -16,6 +16,8 @@
             Character character = new Character(name, race, charClass);
 
             character.SayHello();
+            character.RollAbilityScores();
+            character.ShowAbilityScores();
         }
     }
 }
