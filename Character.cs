@@ -38,13 +38,14 @@ namespace CharacterCreator
         public void RollAbilityScores()
         {
             Random dice = new Random();
-            int one = dice.Next(1, 7);
-            int two = dice.Next(1, 7);
-            int three = dice.Next(1, 7);
-            int four = dice.Next(1, 7);
-            int five = dice.Next(1, 7);
-            int six = dice.Next(1, 7);
-            Console.WriteLine("Na kostkach ti padlo: {0}, {1}, {2}, {3}, {4}, {5}", one, two, three, four, five, six)
+            int[] rolls = new int[6];
+            for (int i = 0; i < 6; i++)
+            {
+                var diceRolls = new List<int>() {dice.Next(1, 7), dice.Next(1, 7), dice.Next(1, 7), dice.Next(1, 7)};
+                diceRolls.Remove(diceRolls.Min());
+                rolls[i] = diceRolls.Sum();
+            }
+            Console.WriteLine("Na kostkach ti padlo: {0}, {1}, {2}, {3}, {4}, {5}", rolls[0], rolls[1], rolls[2], rolls[3], rolls[4], rolls[5]);
         }
 
         public void ModifyAbilityScores()
