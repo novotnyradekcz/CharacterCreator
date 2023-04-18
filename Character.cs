@@ -22,12 +22,12 @@ namespace CharacterCreator
             this._name = name;
             this._race = race;
             this._class = characterClass;
-            this._strength = 10;
-            this._dexterity = 10;
-            this._constitution = 10;
-            this._intelligence = 10;
-            this._wisdom = 10;
-            this._charisma = 10;
+            this._strength = 0;
+            this._dexterity = 0;
+            this._constitution = 0;
+            this._intelligence = 0;
+            this._wisdom = 0;
+            this._charisma = 0;
         }
 
         public void SayHello()
@@ -38,7 +38,18 @@ namespace CharacterCreator
         public void RollAbilityScores()
         {
             Random dice = new Random();
-            dice.Next(1, 7);
+            int one = dice.Next(1, 7);
+            int two = dice.Next(1, 7);
+            int three = dice.Next(1, 7);
+            int four = dice.Next(1, 7);
+            int five = dice.Next(1, 7);
+            int six = dice.Next(1, 7);
+            Console.WriteLine("Na kostkach ti padlo: {0}, {1}, {2}, {3}, {4}, {5}", one, two, three, four, five, six)
+        }
+
+        public void ModifyAbilityScores()
+        {
+            
         }
 
         public void ShowAbilityScores()
