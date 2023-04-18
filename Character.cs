@@ -50,7 +50,16 @@ namespace CharacterCreator
 
         public void ModifyAbilityScores()
         {
-            
+            switch(this._race)
+            {
+                case "clovek":
+                    break;
+            }
+            switch(this._class)
+            {
+                case "bojovnik":
+                    break;
+            }
         }
 
         public void ShowAbilityScores()
