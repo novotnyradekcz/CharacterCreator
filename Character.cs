@@ -54,10 +54,44 @@ namespace CharacterCreator
             {
                 case "clovek":
                     break;
+                case "elf":
+                    break;
+                case "trpaslik":
+                    break;
+                case "pulcik":
+                    break;
+                case "pulork":
+                    break;
+                case "gnom":
+                    break;
+                case "drakorozeny":
+                    break;
+                case "tiefling":
+                    break;
             }
             switch(this._class)
             {
+                case "alchymista":
+                    break;
+                case "barbar":
+                    break;
+                case "bard":
+                    break;
                 case "bojovnik":
+                    break;
+                case "carodej":
+                    break;
+                case "cernokneznik":
+                    break;
+                case "druid":
+                    break;
+                case "klerik":
+                    break;
+                case "kouzelnik":
+                    break;
+                case "lovec netvoru":
+                    break;
+                case "tulak":
                     break;
             }
         }
