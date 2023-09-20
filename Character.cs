@@ -16,6 +16,7 @@ namespace CharacterCreator
         private int _intelligence;
         private int _wisdom;
         private int _charisma;
+        private int[] _diceRolls;
 
         public Character(string name, string race, string characterClass)
         {
@@ -45,7 +46,18 @@ namespace CharacterCreator
                 diceRolls.Remove(diceRolls.Min());
                 rolls[i] = diceRolls.Sum();
             }
+            this._diceRolls = rolls;
             Console.WriteLine("Na kostkach ti padlo: {0}, {1}, {2}, {3}, {4}, {5}", rolls[0], rolls[1], rolls[2], rolls[3], rolls[4], rolls[5]);
+        }
+
+        public void AssignScoreToAbility()
+        {
+            Console.WriteLine("Prirad hodnotu hodu k sile:");
+            Console.WriteLine("Prirad hodnotu hodu k obratnosti:");
+            Console.WriteLine("Prirad hodnotu hodu k odolnosti:");
+            Console.WriteLine("Prirad hodnotu hodu k inteligenci:");
+            Console.WriteLine("Prirad hodnotu hodu k moudrosti:");
+            Console.WriteLine("Prirad hodnotu hodu k charismatu:");
         }
 
         public void ModifyAbilityScores()
