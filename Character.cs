@@ -16,7 +16,7 @@ namespace CharacterCreator
         private int _intelligence;
         private int _wisdom;
         private int _charisma;
-        private int[] _diceRolls;
+        private List<int> _diceRolls = new List<int>();
 
         public Character(string name, string race, string characterClass)
         {
@@ -46,14 +46,41 @@ namespace CharacterCreator
                 diceRolls.Remove(diceRolls.Min());
                 rolls[i] = diceRolls.Sum();
             }
-            this._diceRolls = rolls;
+            foreach (int roll in rolls)
+            {
+                this._diceRolls.Add(roll);
+            }
             Console.WriteLine("Na kostkach ti padlo: {0}, {1}, {2}, {3}, {4}, {5}", rolls[0], rolls[1], rolls[2], rolls[3], rolls[4], rolls[5]);
         }
 
-        public void AssignScoreToAbility()
+        public void AssignScoreToAbilities()
         {
             Console.WriteLine("Prirad hodnotu hodu k sile:");
+            string strength = Console.ReadLine();
+            try
+            {
+                int result = Int32.Parse(strength);
+                this._strength = result;
+                this._diceRolls.Remove(result);
+                Console.WriteLine("{0} prirazeno k sile.", result);
+            }
+            catch (FormatException)
+            {
+                Console.WriteLine($"Unable to parse '{input}'");
+            }
             Console.WriteLine("Prirad hodnotu hodu k obratnosti:");
+            string dexterity = Console.ReadLine();
+            try
+            {
+                int result = Int32.Parse(dexterity);
+                this._strength = result;
+                this._diceRolls.Remove(result);
+                Console.WriteLine("{0} prirazeno k obratnosti.", result);
+            }
+            catch (FormatException)
+            {
+                Console.WriteLine($"Unable to parse '{input}'");
+            }
             Console.WriteLine("Prirad hodnotu hodu k odolnosti:");
             Console.WriteLine("Prirad hodnotu hodu k inteligenci:");
             Console.WriteLine("Prirad hodnotu hodu k moudrosti:");
