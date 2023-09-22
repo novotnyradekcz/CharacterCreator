@@ -50,12 +50,13 @@ namespace CharacterCreator
             {
                 this._diceRolls.Add(roll);
             }
-            Console.WriteLine("Na kostkach ti padlo: {0}, {1}, {2}, {3}, {4}, {5}", rolls[0], rolls[1], rolls[2], rolls[3], rolls[4], rolls[5]);
+            Console.WriteLine("Na kostkach ti padlo: {0}, {1}, {2}, {3}, {4}, {5}.", rolls[0], rolls[1], rolls[2], rolls[3], rolls[4], rolls[5]);
         }
 
         public void AssignScoreToAbilities()
         {
             Console.WriteLine("Prirad hodnotu hodu k sile:");
+            Console.WriteLine("Jeste ti zbyva priradit: {0}, {1}, {2}, {3}, {4}, {5}.", this._diceRolls[0], this._diceRolls[1], this._diceRolls[2], this._diceRolls[3], this._diceRolls[4], this._diceRolls[5]);
             string strength = Console.ReadLine();
             try
             {
@@ -69,11 +70,12 @@ namespace CharacterCreator
                 Console.WriteLine($"Unable to parse '{input}'");
             }
             Console.WriteLine("Prirad hodnotu hodu k obratnosti:");
+            Console.WriteLine("Jeste ti zbyva priradit: {0}, {1}, {2}, {3}, {4}.", this._diceRolls[0], this._diceRolls[1], this._diceRolls[2], this._diceRolls[3], this._diceRolls[4]);
             string dexterity = Console.ReadLine();
             try
             {
                 int result = Int32.Parse(dexterity);
-                this._strength = result;
+                this._dexterity = result;
                 this._diceRolls.Remove(result);
                 Console.WriteLine("{0} prirazeno k obratnosti.", result);
             }
@@ -82,6 +84,19 @@ namespace CharacterCreator
                 Console.WriteLine($"Unable to parse '{input}'");
             }
             Console.WriteLine("Prirad hodnotu hodu k odolnosti:");
+            Console.WriteLine("Jeste ti zbyva priradit: {0}, {1}, {2}, {3}.", this._diceRolls[0], this._diceRolls[1], this._diceRolls[2], this._diceRolls[3]);
+            string constitution = Console.ReadLine();
+            try
+            {
+                int result = Int32.Parse(constitution);
+                this._constitution = result;
+                this._diceRolls.Remove(result);
+                Console.WriteLine("{0} prirazeno k obratnosti.", result);
+            }
+            catch (FormatException)
+            {
+                Console.WriteLine($"Unable to parse '{input}'");
+            }
             Console.WriteLine("Prirad hodnotu hodu k inteligenci:");
             Console.WriteLine("Prirad hodnotu hodu k moudrosti:");
             Console.WriteLine("Prirad hodnotu hodu k charismatu:");
