@@ -67,7 +67,7 @@ namespace CharacterCreator
             }
             catch (FormatException)
             {
-                Console.WriteLine($"Unable to parse '{input}'");
+                Console.WriteLine($"'{input}' neni platna hodnota jednoho z hodu.");
             }
             Console.WriteLine("Prirad hodnotu hodu k obratnosti:");
             Console.WriteLine("Jeste ti zbyva priradit: {0}, {1}, {2}, {3}, {4}.", this._diceRolls[0], this._diceRolls[1], this._diceRolls[2], this._diceRolls[3], this._diceRolls[4]);
@@ -81,7 +81,7 @@ namespace CharacterCreator
             }
             catch (FormatException)
             {
-                Console.WriteLine($"Unable to parse '{input}'");
+                Console.WriteLine($"'{input}' neni platna hodnota jednoho z hodu.");
             }
             Console.WriteLine("Prirad hodnotu hodu k odolnosti:");
             Console.WriteLine("Jeste ti zbyva priradit: {0}, {1}, {2}, {3}.", this._diceRolls[0], this._diceRolls[1], this._diceRolls[2], this._diceRolls[3]);
@@ -91,15 +91,43 @@ namespace CharacterCreator
                 int result = Int32.Parse(constitution);
                 this._constitution = result;
                 this._diceRolls.Remove(result);
-                Console.WriteLine("{0} prirazeno k obratnosti.", result);
+                Console.WriteLine("{0} prirazeno k odolnosti.", result);
             }
             catch (FormatException)
             {
-                Console.WriteLine($"Unable to parse '{input}'");
+                Console.WriteLine($"'{input}' neni platna hodnota jednoho z hodu.");
             }
             Console.WriteLine("Prirad hodnotu hodu k inteligenci:");
+            Console.WriteLine("Jeste ti zbyva priradit: {0}, {1}, {2}.", this._diceRolls[0], this._diceRolls[1], this._diceRolls[2]);
+            string intelligence = Console.ReadLine();
+            try
+            {
+                int result = Int32.Parse(intelligencen);
+                this._intelligence = result;
+                this._diceRolls.Remove(result);
+                Console.WriteLine("{0} prirazeno k inteligenci.", result);
+            }
+            catch (FormatException)
+            {
+                Console.WriteLine($"'{input}' neni platna hodnota jednoho z hodu.");
+            }
             Console.WriteLine("Prirad hodnotu hodu k moudrosti:");
-            Console.WriteLine("Prirad hodnotu hodu k charismatu:");
+            Console.WriteLine("Jeste ti zbyva priradit: {0}, {1}.", this._diceRolls[0], this._diceRolls[1]);
+            string wisdom = Console.ReadLine();
+            try
+            {
+                int result = Int32.Parse(intelligence);
+                this._wisdom = result;
+                this._diceRolls.Remove(result);
+                Console.WriteLine("{0} prirazeno k moudrosti.", result);
+            }
+            catch (FormatException)
+            {
+                Console.WriteLine($"'{input}' neni platna hodnota jednoho z hodu.");
+            }
+            Console.WriteLine("Jeste zbyva priradit: {0}.", this._diceRolls[0]);
+            this._charisma = this._diceRolls[0];
+            Console.WriteLine("{0} prirazeno k charismatu.", result);
         }
 
         public void ModifyAbilityScores()
