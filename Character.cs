@@ -16,6 +16,18 @@ namespace CharacterCreator
         private int _intelligence;
         private int _wisdom;
         private int _charisma;
+        public static List<string> _races = new List<string>()
+        {
+            "clovek",
+            "elf",
+            "trpaslik",
+            "pulcik",
+            "pulork",
+            "gnom",
+            "drakorozeny",
+            "tiefling"
+        };
+        public static List<string> _classes = new List<string>();
         private List<int> _diceRolls = new List<int>();
 
         public Character(string name, string race, string characterClass)
@@ -55,20 +67,28 @@ namespace CharacterCreator
 
         public void AssignScoreToAbilities()
         {
-            Console.WriteLine("Prirad hodnotu hodu k sile:");
-            Console.WriteLine("Jeste ti zbyva priradit: {0}, {1}, {2}, {3}, {4}, {5}.", this._diceRolls[0], this._diceRolls[1], this._diceRolls[2], this._diceRolls[3], this._diceRolls[4], this._diceRolls[5]);
-            string strength = Console.ReadLine();
-            try
+            while (this._strength == 0)
             {
-                int result = Int32.Parse(strength);
-                this._strength = result;
-                this._diceRolls.Remove(result);
-                Console.WriteLine("{0} prirazeno k sile.", result);
+                Console.WriteLine("Prirad hodnotu hodu k sile:");
+                Console.WriteLine("Jeste ti zbyva priradit: {0}, {1}, {2}, {3}, {4}, {5}.", this._diceRolls[0], this._diceRolls[1], this._diceRolls[2], this._diceRolls[3], this._diceRolls[4], this._diceRolls[5]);
+                string strength = Console.ReadLine();
+                try
+                {
+                    int result = Int32.Parse(strength);
+                    if (!this._diceRolls.Contains(result))
+                    {
+                        throw new FormatException();
+                    }
+                    this._strength = result;
+                    this._diceRolls.Remove(result);
+                    Console.WriteLine("Hodnota {0} prirazena k sile.", result);
+                }
+                catch (FormatException)
+                {
+                    Console.WriteLine($"'{strength}' neni platna hodnota jednoho z hodu.");
+                }
             }
-            catch (FormatException)
-            {
-                Console.WriteLine($"'{strength}' neni platna hodnota jednoho z hodu.");
-            }
+            
             Console.WriteLine("Prirad hodnotu hodu k obratnosti:");
             Console.WriteLine("Jeste ti zbyva priradit: {0}, {1}, {2}, {3}, {4}.", this._diceRolls[0], this._diceRolls[1], this._diceRolls[2], this._diceRolls[3], this._diceRolls[4]);
             string dexterity = Console.ReadLine();
@@ -77,7 +97,7 @@ namespace CharacterCreator
                 int result = Int32.Parse(dexterity);
                 this._dexterity = result;
                 this._diceRolls.Remove(result);
-                Console.WriteLine("{0} prirazeno k obratnosti.", result);
+                Console.WriteLine("Hodnota {0} prirazena k obratnosti.", result);
             }
             catch (FormatException)
             {
@@ -91,7 +111,7 @@ namespace CharacterCreator
                 int result = Int32.Parse(constitution);
                 this._constitution = result;
                 this._diceRolls.Remove(result);
-                Console.WriteLine("{0} prirazeno k odolnosti.", result);
+                Console.WriteLine("Hodnota {0} prirazena k odolnosti.", result);
             }
             catch (FormatException)
             {
@@ -105,7 +125,7 @@ namespace CharacterCreator
                 int result = Int32.Parse(intelligence);
                 this._intelligence = result;
                 this._diceRolls.Remove(result);
-                Console.WriteLine("{0} prirazeno k inteligenci.", result);
+                Console.WriteLine("Hodnota {0} prirazena k inteligenci.", result);
             }
             catch (FormatException)
             {
@@ -119,7 +139,7 @@ namespace CharacterCreator
                 int result = Int32.Parse(wisdom);
                 this._wisdom = result;
                 this._diceRolls.Remove(result);
-                Console.WriteLine("{0} prirazeno k moudrosti.", result);
+                Console.WriteLine("Hodnota {0} prirazena k moudrosti.", result);
             }
             catch (FormatException)
             {
@@ -129,7 +149,7 @@ namespace CharacterCreator
             int charisma = this._diceRolls[0];
             this._charisma = charisma;
             this._diceRolls.Remove(charisma);
-            Console.WriteLine("{0} prirazeno k charismatu.", charisma);
+            Console.WriteLine("Hodnota {0} prirazena k charismatu.", charisma);
         }
 
         public void ModifyAbilityScores()
