@@ -16,18 +16,6 @@ namespace CharacterCreator
         private int _intelligence;
         private int _wisdom;
         private int _charisma;
-        public static List<string> _races = new List<string>()
-        {
-            "clovek",
-            "elf",
-            "trpaslik",
-            "pulcik",
-            "pulork",
-            "gnom",
-            "drakorozeny",
-            "tiefling"
-        };
-        public static List<string> _classes = new List<string>();
         private List<int> _diceRolls = new List<int>();
 
         public Character(string name, string race, string characterClass)
