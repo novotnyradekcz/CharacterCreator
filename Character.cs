@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace CharacterCreator
 {
     public class Character
@@ -76,62 +71,85 @@ namespace CharacterCreator
                     Console.WriteLine($"'{strength}' neni platna hodnota jednoho z hodu.");
                 }
             }
-            
-            Console.WriteLine("Prirad hodnotu hodu k obratnosti:");
-            Console.WriteLine("Jeste ti zbyva priradit: {0}, {1}, {2}, {3}, {4}.", this._diceRolls[0], this._diceRolls[1], this._diceRolls[2], this._diceRolls[3], this._diceRolls[4]);
-            string dexterity = Console.ReadLine();
-            try
-            {
-                int result = Int32.Parse(dexterity);
-                this._dexterity = result;
-                this._diceRolls.Remove(result);
-                Console.WriteLine("Hodnota {0} prirazena k obratnosti.", result);
+            while (this._dexterity == 0) {
+                Console.WriteLine("Prirad hodnotu hodu k obratnosti:");
+                Console.WriteLine("Jeste ti zbyva priradit: {0}, {1}, {2}, {3}, {4}.", this._diceRolls[0], this._diceRolls[1], this._diceRolls[2], this._diceRolls[3], this._diceRolls[4]);
+                string dexterity = Console.ReadLine();
+                try
+                {
+                    int result = Int32.Parse(dexterity);
+                    if (!this._diceRolls.Contains(result))
+                    {
+                        throw new FormatException();
+                    }
+                    this._dexterity = result;
+                    this._diceRolls.Remove(result);
+                    Console.WriteLine("Hodnota {0} prirazena k obratnosti.", result);
+                }
+                catch (FormatException)
+                {
+                    Console.WriteLine($"'{dexterity}' neni platna hodnota jednoho z hodu.");
+                }
             }
-            catch (FormatException)
-            {
-                Console.WriteLine($"'{dexterity}' neni platna hodnota jednoho z hodu.");
+            while (this._constitution == 0) {
+                Console.WriteLine("Prirad hodnotu hodu k odolnosti:");
+                Console.WriteLine("Jeste ti zbyva priradit: {0}, {1}, {2}, {3}.", this._diceRolls[0], this._diceRolls[1], this._diceRolls[2], this._diceRolls[3]);
+                string constitution = Console.ReadLine();
+                try
+                {
+                    int result = Int32.Parse(constitution);
+                    if (!this._diceRolls.Contains(result))
+                    {
+                        throw new FormatException();
+                    }
+                    this._constitution = result;
+                    this._diceRolls.Remove(result);
+                    Console.WriteLine("Hodnota {0} prirazena k odolnosti.", result);
+                }
+                catch (FormatException)
+                {
+                    Console.WriteLine($"'{constitution}' neni platna hodnota jednoho z hodu.");
+                }
             }
-            Console.WriteLine("Prirad hodnotu hodu k odolnosti:");
-            Console.WriteLine("Jeste ti zbyva priradit: {0}, {1}, {2}, {3}.", this._diceRolls[0], this._diceRolls[1], this._diceRolls[2], this._diceRolls[3]);
-            string constitution = Console.ReadLine();
-            try
-            {
-                int result = Int32.Parse(constitution);
-                this._constitution = result;
-                this._diceRolls.Remove(result);
-                Console.WriteLine("Hodnota {0} prirazena k odolnosti.", result);
+            while (this._intelligence == 0) {
+                Console.WriteLine("Prirad hodnotu hodu k inteligenci:");
+                Console.WriteLine("Jeste ti zbyva priradit: {0}, {1}, {2}.", this._diceRolls[0], this._diceRolls[1], this._diceRolls[2]);
+                string intelligence = Console.ReadLine();
+                try
+                {
+                    int result = Int32.Parse(intelligence);
+                    if (!this._diceRolls.Contains(result))
+                    {
+                        throw new FormatException();
+                    }
+                    this._intelligence = result;
+                    this._diceRolls.Remove(result);
+                    Console.WriteLine("Hodnota {0} prirazena k inteligenci.", result);
+                }
+                catch (FormatException)
+                {
+                    Console.WriteLine($"'{intelligence}' neni platna hodnota jednoho z hodu.");
+                }
             }
-            catch (FormatException)
-            {
-                Console.WriteLine($"'{constitution}' neni platna hodnota jednoho z hodu.");
-            }
-            Console.WriteLine("Prirad hodnotu hodu k inteligenci:");
-            Console.WriteLine("Jeste ti zbyva priradit: {0}, {1}, {2}.", this._diceRolls[0], this._diceRolls[1], this._diceRolls[2]);
-            string intelligence = Console.ReadLine();
-            try
-            {
-                int result = Int32.Parse(intelligence);
-                this._intelligence = result;
-                this._diceRolls.Remove(result);
-                Console.WriteLine("Hodnota {0} prirazena k inteligenci.", result);
-            }
-            catch (FormatException)
-            {
-                Console.WriteLine($"'{intelligence}' neni platna hodnota jednoho z hodu.");
-            }
-            Console.WriteLine("Prirad hodnotu hodu k moudrosti:");
-            Console.WriteLine("Jeste ti zbyva priradit: {0}, {1}.", this._diceRolls[0], this._diceRolls[1]);
-            string wisdom = Console.ReadLine();
-            try
-            {
-                int result = Int32.Parse(wisdom);
-                this._wisdom = result;
-                this._diceRolls.Remove(result);
-                Console.WriteLine("Hodnota {0} prirazena k moudrosti.", result);
-            }
-            catch (FormatException)
-            {
-                Console.WriteLine($"'{wisdom}' neni platna hodnota jednoho z hodu.");
+            while (this._wisdom == 0) {
+                Console.WriteLine("Prirad hodnotu hodu k moudrosti:");
+                Console.WriteLine("Jeste ti zbyva priradit: {0}, {1}.", this._diceRolls[0], this._diceRolls[1]);
+                string wisdom = Console.ReadLine();
+                try
+                {
+                    int result = Int32.Parse(wisdom);
+                    if (!this._diceRolls.Contains(result))
+                    {
+                        throw new FormatException();
+                    }
+                    this._wisdom = result;
+                    this._diceRolls.Remove(result);
+                    Console.WriteLine("Hodnota {0} prirazena k moudrosti.", result);
+                }
+                catch (FormatException)
+                {
+                    Console.WriteLine($"'{wisdom}' neni platna hodnota jednoho z hodu.");
+                }
             }
             Console.WriteLine("Jeste zbyva priradit: {0}.", this._diceRolls[0]);
             int charisma = this._diceRolls[0];
