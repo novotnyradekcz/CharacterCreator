@@ -8,13 +8,11 @@
 
             Console.WriteLine("Zadej jmeno postavy:");
             string name = Console.ReadLine();
-            Console.WriteLine("Zadej rasu postavy:");
-            string race = Console.ReadLine();
-            Console.WriteLine("Zadej povolani postavy:");
-            string charClass = Console.ReadLine();
 
-            Character character = new Character(name, race, charClass);
+            Character character = new Character(name);
 
+            character.AssignRace();
+            character.AssignClass();
             character.SayHello();
             character.RollAbilityScores();
             character.ShowAbilityScores();

@@ -13,17 +13,38 @@ namespace CharacterCreator
         private int _charisma;
         private List<int> _diceRolls = new List<int>();
 
-        public Character(string name, string race, string characterClass)
+        public Character(string name)
         {
             this._name = name;
-            this._race = race;
-            this._class = characterClass;
+            this._race = "";
+            this._class = "";
             this._strength = 0;
             this._dexterity = 0;
             this._constitution = 0;
             this._intelligence = 0;
             this._wisdom = 0;
             this._charisma = 0;
+        }
+
+        public void AssignName()
+        {
+            Console.WriteLine("Zadej jmeno postavy:");
+            string name = Console.ReadLine();
+            this._name = name;
+        }
+
+        public void AssignRace()
+        {
+            Console.WriteLine("Zadej rasu postavy:");
+            string race = Console.ReadLine();
+            this._race = race;
+        }
+
+        public void AssignClass()
+        {
+            Console.WriteLine("Zadej povolani postavy:");
+            string characterClass = Console.ReadLine();
+            this._class = characterClass;
         }
 
         public void SayHello()

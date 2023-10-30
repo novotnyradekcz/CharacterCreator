@@ -7,7 +7,7 @@ namespace CharacterCreator
 {
     public class NonPlayerCharacter : Character
     {
-        public NonPlayerCharacter(string name, string race, string characterClass) : base(name, race, characterClass)
+        public NonPlayerCharacter(string name) : base(name)
         {
         }
     }
