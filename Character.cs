@@ -26,12 +26,12 @@ namespace CharacterCreator
             this._charisma = 0;
         }
 
-        public void AssignName()
-        {
-            Console.WriteLine("Zadej jmeno postavy:");
-            string name = Console.ReadLine();
-            this._name = name;
-        }
+        // public void AssignName()
+        // {
+        //     Console.WriteLine("Zadej jmeno postavy:");
+        //     string name = Console.ReadLine();
+        //     this._name = name;
+        // }
 
         public void AssignRace()
         {
