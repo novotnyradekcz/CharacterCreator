@@ -30,7 +30,7 @@ namespace CharacterCreator
             this._charisma = 0;
             this._races.Add("clovek");
             this._races.Add("elf");
-            this._races.Add("trpslik");
+            this._races.Add("trpaslik");
             this._races.Add("pulcik");
             this._races.Add("pulork");
             this._races.Add("gnom");
@@ -75,9 +75,19 @@ namespace CharacterCreator
 
         public void AssignClass()
         {
-            Console.WriteLine("Zadej povolani postavy:");
-            string characterClass = Console.ReadLine();
-            this._class = characterClass;
+            while (this._class == "")
+            {
+                Console.WriteLine($"Vyber si povolani postavy: {string.Join(", ", this._classes)}.");
+                string characterClass = Console.ReadLine();
+                if (this._classes.Contains(characterClass))
+                {
+                    this._class = characterClass;
+                }
+                else
+                {
+                    Console.WriteLine($"'{characterClass}' neni jedno z hratelnych povolani.");
+                }
+            }
         }
 
         public void SayHello()
