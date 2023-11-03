@@ -15,7 +15,6 @@
             character.AssignClass();
             character.SayHello();
             character.RollAbilityScores();
-            character.ShowAbilityScores();
             character.AssignScoreToAbilities();
             character.ShowAbilityScores();
         }
