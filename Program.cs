@@ -9,7 +9,7 @@
             Console.WriteLine("Zadej jmeno postavy:");
             string name = Console.ReadLine();
 
-            Character character = new Character(name);
+            PlayerCharacter character = new PlayerCharacter(name);
 
             character.AssignRace();
             character.AssignClass();

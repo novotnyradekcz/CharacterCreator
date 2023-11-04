@@ -5,8 +5,8 @@ namespace CharacterCreator
     public class Character
     {
         private string _name;
-        private string _race;
-        private string _class;
+        internal string _race;
+        internal string _class;
         private int _strength;
         private int _dexterity;
         private int _constitution;
@@ -14,8 +14,8 @@ namespace CharacterCreator
         private int _wisdom;
         private int _charisma;
         private List<int> _diceRolls = new List<int>();
-        private HashSet<string> _races = new HashSet<string>();
-        private HashSet<string> _classes = new HashSet<string>();
+        internal HashSet<string> _races = new HashSet<string>();
+        internal HashSet<string> _classes = new HashSet<string>();
 
         public Character(string name)
         {
@@ -56,37 +56,23 @@ namespace CharacterCreator
             this._name = name;
         }
 
-        public void AssignRace()
+        virtual public void AssignRace()
         {
             while (this._race == "")
             {
-                Console.WriteLine($"Vyber si rasu postavy: {string.Join(", ", this._races)}.");
+                Console.WriteLine($"Zadej rasu postavy:");
                 string race = Console.ReadLine();
-                if (this._races.Contains(race))
-                {
-                    this._race = race;
-                }
-                else
-                {
-                    Console.WriteLine($"'{race}' neni jedna z hratelnych ras.");
-                }
+                this._race = race;
             }
         }
 
-        public void AssignClass()
+        virtual public void AssignClass()
         {
             while (this._class == "")
             {
-                Console.WriteLine($"Vyber si povolani postavy: {string.Join(", ", this._classes)}.");
+                Console.WriteLine($"Zadej povolani postavy:");
                 string characterClass = Console.ReadLine();
-                if (this._classes.Contains(characterClass))
-                {
-                    this._class = characterClass;
-                }
-                else
-                {
-                    Console.WriteLine($"'{characterClass}' neni jedno z hratelnych povolani.");
-                }
+                this._class = characterClass;
             }
         }
 
