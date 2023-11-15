@@ -9,6 +9,25 @@ namespace CharacterCreator
     {
         public PlayerCharacter(string name) : base(name)
         {
+            this._races.Add("clovek");
+            this._races.Add("elf");
+            this._races.Add("trpaslik");
+            this._races.Add("pulcik");
+            this._races.Add("pulork");
+            this._races.Add("gnom");
+            this._races.Add("drakorozeny");
+            this._races.Add("tiefling");
+            this._classes.Add("alchymista");
+            this._classes.Add("barbar");
+            this._classes.Add("bard");
+            this._classes.Add("bojovnik");
+            this._classes.Add("carodej");
+            this._classes.Add("cernokneznik");
+            this._classes.Add("druid");
+            this._classes.Add("klerik");
+            this._classes.Add("kouzelnik");
+            this._classes.Add("lovec netvoru");
+            this._classes.Add("tulak");
         }
 
         override public void AssignRace()
