@@ -1,0 +1,413 @@
+﻿@page "/"
+@using CharacterCreator.Core
+@inject ICharacterRuleset Ruleset
+@inject CharacterBuildService BuildService
+@rendermode InteractiveServer
+
+<PageTitle>Ateliér postav | Jeskyně a draci</PageTitle>
+
+<div class="app-shell">
+	<header class="masthead">
+		<a class="brand" href="/" aria-label="Ateliér postav, úvodní stránka">
+			<span class="brand-mark" aria-hidden="true">A</span>
+			<span>Ateliér postav</span>
+		</a>
+		<span class="ruleset-label"><span class="status-dot"></span> Jeskyně a draci <span class="edition">JaD · v1</span></span>
+	</header>
+
+	<main class="workbench">
+		<section class="page-intro">
+			<p class="eyebrow">Kronika začíná</p>
+			<h1>Zrození<br /><span>postavy</span></h1>
+			<p class="intro-copy">Vyber původ a povolání. Potom hoď kostkami a rozděl své vlastnosti.</p>
+		</section>
+
+		<div class="creator-grid">
+			<section class="setup-panel" aria-labelledby="identity-heading">
+				<div class="section-heading">
+					<span class="step-number">01</span>
+					<div>
+						<p class="eyebrow">Nejdřív kořeny</p>
+						<h2 id="identity-heading">Kdo se vydává na cestu?</h2>
+					</div>
+				</div>
+
+				<label class="field-label" for="character-name">Jméno postavy</label>
+				<input id="character-name" class="text-field" @bind="_name" @bind:event="oninput" @bind:after="ClearBuild" maxlength="48" placeholder="Například Mira" autocomplete="off" />
+
+				<div class="field-row">
+					<div class="field-group">
+						<label class="field-label" for="ancestry">Rasa</label>
+						<select id="ancestry" class="select-field" @bind="_ancestryId" @bind:after="OnAncestryChanged">
+							<option value="">Vyber rasu</option>
+							@foreach (var ancestry in Ruleset.Ancestries)
+							{
+								<option value="@ancestry.Id">@AncestryName(ancestry.Id)</option>
+							}
+						</select>
+					</div>
+					<div class="field-group">
+						<label class="field-label" for="character-class">Povolání</label>
+						<select id="character-class" class="select-field" @bind="_classId" @bind:after="ClearBuild">
+							<option value="">Vyber povolání</option>
+							@foreach (var characterClass in Ruleset.Classes)
+							{
+								<option value="@characterClass.Id">@ClassName(characterClass.Id)</option>
+							}
+						</select>
+					</div>
+				</div>
+
+				@if (SelectedAncestry?.Subraces.Count > 0)
+				{
+					<div class="field-group subrace-field">
+						<label class="field-label" for="subrace">Podoba rodu</label>
+						<select id="subrace" class="select-field" @bind="_subraceId" @bind:after="OnSubraceChanged">
+							<option value="">Vyber podrasu</option>
+							@foreach (var subrace in SelectedAncestry.Subraces)
+							{
+								<option value="@subrace.Id">@SubraceName(subrace.Id)</option>
+							}
+						</select>
+					</div>
+				}
+
+				@if (ChoiceRule is { } choiceRule)
+				{
+					<div class="bonus-choice-group">
+						<p class="field-label">Vyber vlastnosti pro rasový bonus</p>
+						<div class="field-row">
+							<div class="field-group">
+								<label class="visually-hidden" for="bonus-one">První vlastnost</label>
+								<select id="bonus-one" class="select-field" @bind="_bonusChoiceOne" @bind:after="ClearBuild">
+									<option value="">Vyber vlastnost</option>
+									@foreach (var ability in choiceRule.AllowedAbilities)
+									{
+										<option value="@ability">@AbilityName(ability)</option>
+									}
+								</select>
+							</div>
+							@if (choiceRule.Count > 1)
+							{
+								<div class="field-group">
+									<label class="visually-hidden" for="bonus-two">Druhá vlastnost</label>
+									<select id="bonus-two" class="select-field" @bind="_bonusChoiceTwo" @bind:after="ClearBuild">
+										<option value="">Vyber vlastnost</option>
+										@foreach (var ability in choiceRule.AllowedAbilities.Where(ability => ability != _bonusChoiceOne))
+										{
+											<option value="@ability">@AbilityName(ability)</option>
+										}
+									</select>
+								</div>
+							}
+						</div>
+						<p class="field-hint">Každý bonus musí připadnout na jinou vlastnost.</p>
+					</div>
+				}
+
+				@if (HasValidSelections)
+				{
+					<div class="bonus-preview" aria-live="polite">
+						<span class="preview-label">Rasové bonusy</span>
+						@foreach (var bonus in CurrentBonuses.OrderBy(pair => pair.Key))
+						{
+							<span class="bonus-token">@AbilityShortName(bonus.Key) <b>+@bonus.Value</b></span>
+						}
+					</div>
+				}
+			</section>
+
+			<section class="roll-panel" aria-labelledby="roll-heading">
+				<div class="section-heading">
+					<span class="step-number">02</span>
+					<div>
+						<p class="eyebrow">Osud v kostkách</p>
+						<h2 id="roll-heading">Rozdej vlastnosti</h2>
+					</div>
+				</div>
+				<p class="section-copy">Každý hod: 4k6, nejnižší kostka se nepočítá. Šest výsledků pak rozděl mezi vlastnosti.</p>
+
+				<button class="primary-button" type="button" @onclick="RollScores" disabled="@(!CanRoll)">
+					<span aria-hidden="true">✦</span> Hodit šestkrát
+				</button>
+
+				@if (_rolls.Count > 0)
+				{
+					<div class="roll-results" aria-label="Výsledky hodů">
+						@foreach (var roll in _rolls)
+						{
+							<article class="roll-result" aria-label="Hod @roll.Total">
+								<div class="dice-row" aria-label="Kostky: @string.Join(", ", roll.Dice)">
+									@for (var dieIndex = 0; dieIndex < roll.Dice.Count; dieIndex++)
+									{
+										<span class="die @(IsDroppedDie(roll, dieIndex) ? "die-dropped" : null)">@roll.Dice[dieIndex]</span>
+									}
+								</div>
+								<span class="roll-total">@roll.Total</span>
+							</article>
+						}
+					</div>
+
+					<div class="assignment-heading">
+						<span class="mini-rule"></span>
+						<p>Přiřaď každý hod právě jednou</p>
+					</div>
+					<div class="assignment-list">
+						@foreach (var ability in Enum.GetValues<Ability>())
+						{
+							<label class="assignment-row" for="score-@ability">
+								<span class="ability-name">@AbilityName(ability)</span>
+								<select id="score-@ability" class="score-select" @bind="_assignments[ability]" @bind:after="ClearBuild">
+									<option value="">Hod</option>
+									@foreach (var roll in _rolls)
+									{
+										<option value="@roll.Id" disabled="@IsRollUsedElsewhere(ability, roll.Id)">@roll.Total</option>
+									}
+								</select>
+							</label>
+						}
+					</div>
+
+					@if (CanBuild)
+					{
+						<button class="finish-button" type="button" @onclick="BuildCharacter">Dokončit postavu <span aria-hidden="true">→</span></button>
+					}
+				}
+				else
+				{
+					<div class="roll-placeholder">
+						<span class="placeholder-mark" aria-hidden="true">✳</span>
+						<p>Tvoje hody se objeví tady.</p>
+					</div>
+				}
+			</section>
+		</div>
+
+		@if (_sheet is not null)
+		{
+			<section class="character-sheet" aria-labelledby="sheet-heading" aria-live="polite">
+				<div class="sheet-title">
+					<div>
+						<p class="eyebrow">Postava připravena</p>
+						<h2 id="sheet-heading">@_sheet.Name</h2>
+						<p class="sheet-subtitle">@AncestryName(_sheet.AncestryId) · @SelectedSubraceName · @SelectedClassName</p>
+					</div>
+					<span class="sheet-seal">JaD</span>
+				</div>
+				<div class="score-grid">
+					@foreach (var ability in Enum.GetValues<Ability>())
+					{
+						var bonus = _sheet.Bonuses.GetValueOrDefault(ability);
+						<article class="score-card">
+							<span class="score-label">@AbilityName(ability)</span>
+							<strong>@_sheet.Scores[ability]</strong>
+							<span class="score-detail">základ @_sheet.BaseScores[ability] @if (bonus > 0) { <span>· +@bonus</span> }</span>
+						</article>
+					}
+				</div>
+				<button class="text-button" type="button" @onclick="() => _sheet = null">Upravit přiřazení</button>
+			</section>
+		}
+	</main>
+
+	<footer class="page-footer">
+		<span>Ateliér postav</span>
+		<span>Pravidla JaD · <span class="footer-mark">hod kostkou, vlastní příběh</span></span>
+	</footer>
+</div>
+
+@code {
+	private string _name = string.Empty;
+	private string _ancestryId = string.Empty;
+	private string? _subraceId;
+	private string _classId = string.Empty;
+	private Ability? _bonusChoiceOne;
+	private Ability? _bonusChoiceTwo;
+	private IReadOnlyList<AbilityRoll> _rolls = [];
+	private readonly Dictionary<Ability, int?> _assignments = Enum.GetValues<Ability>()
+		.ToDictionary(ability => ability, _ => (int?)null);
+	private CharacterSheet? _sheet;
+
+	private AncestryDefinition? SelectedAncestry => Ruleset.Ancestries.FirstOrDefault(ancestry => ancestry.Id == _ancestryId);
+
+	private SubraceDefinition? SelectedSubrace => SelectedAncestry?.Subraces.FirstOrDefault(subrace => subrace.Id == _subraceId);
+
+	private string? SelectedSubraceName => SelectedSubrace is { } subrace ? SubraceName(subrace.Id) : null;
+
+	private string? SelectedClassName => Ruleset.Classes.Any(item => item.Id == _classId) ? ClassName(_classId) : null;
+
+	private AbilityChoiceRule? ChoiceRule => SelectedSubrace?.ChoiceRule ?? SelectedAncestry?.ChoiceRule;
+
+	private IReadOnlyList<Ability> BonusChoices => new[] { _bonusChoiceOne, _bonusChoiceTwo }
+		.Where(choice => choice.HasValue)
+		.Select(choice => choice!.Value)
+		.ToArray();
+
+	private bool HasValidSelections
+	{
+		get
+		{
+			if (SelectedAncestry is null || string.IsNullOrEmpty(_classId) ||
+				(SelectedAncestry.Subraces.Count > 0 && SelectedSubrace is null))
+			{
+				return false;
+			}
+
+			try
+			{
+				_ = Ruleset.ResolveAbilityBonuses(_ancestryId, _subraceId, BonusChoices);
+				return true;
+			}
+			catch (ArgumentException)
+			{
+				return false;
+			}
+		}
+	}
+
+	private bool CanRoll => !string.IsNullOrWhiteSpace(_name) && HasValidSelections;
+
+	private IReadOnlyDictionary<Ability, int> CurrentBonuses => HasValidSelections
+		? Ruleset.ResolveAbilityBonuses(_ancestryId, _subraceId, BonusChoices)
+		: new Dictionary<Ability, int>();
+
+	private bool CanBuild => CanRoll && _rolls.Count == Enum.GetValues<Ability>().Length &&
+		_assignments.Values.All(value => value.HasValue) &&
+		_assignments.Values.Distinct().Count() == _assignments.Count;
+
+	private void OnAncestryChanged()
+	{
+		_subraceId = null;
+		_bonusChoiceOne = null;
+		_bonusChoiceTwo = null;
+		ClearRolls();
+	}
+
+	private void OnSubraceChanged()
+	{
+		_bonusChoiceOne = null;
+		_bonusChoiceTwo = null;
+		ClearRolls();
+	}
+
+	private void ClearBuild() => _sheet = null;
+
+	private void ClearRolls()
+	{
+		_rolls = [];
+		foreach (var ability in Enum.GetValues<Ability>())
+		{
+			_assignments[ability] = null;
+		}
+
+		_sheet = null;
+	}
+
+	private void RollScores()
+	{
+		if (!CanRoll)
+		{
+			return;
+		}
+
+		_rolls = AbilityScoreRoller.Roll(Ruleset.AbilityScoreRule);
+		ClearRollsAssignments();
+	}
+
+	private void ClearRollsAssignments()
+	{
+		foreach (var ability in Enum.GetValues<Ability>())
+		{
+			_assignments[ability] = null;
+		}
+
+		_sheet = null;
+	}
+
+	private bool IsDroppedDie(AbilityRoll roll, int dieIndex) =>
+		dieIndex == roll.Dice.ToList().IndexOf(roll.Dice.Min());
+
+	private bool IsRollUsedElsewhere(Ability ability, int rollId) =>
+		_assignments.Any(assignment => assignment.Key != ability && assignment.Value == rollId);
+
+	private void BuildCharacter()
+	{
+		if (!CanBuild)
+		{
+			return;
+		}
+
+		_sheet = BuildService.Build(new CharacterBuildRequest(
+			_name,
+			_ancestryId,
+			_subraceId,
+			_classId,
+			_rolls,
+			_assignments.ToDictionary(assignment => assignment.Key, assignment => assignment.Value!.Value),
+			BonusChoices));
+	}
+
+	private static string AbilityName(Ability ability) => ability switch
+	{
+		Ability.Strength => "Síla",
+		Ability.Dexterity => "Obratnost",
+		Ability.Constitution => "Odolnost",
+		Ability.Intelligence => "Inteligence",
+		Ability.Wisdom => "Moudrost",
+		Ability.Charisma => "Charisma",
+		_ => ability.ToString()
+	};
+
+	private static string AbilityShortName(Ability ability) => ability switch
+	{
+		Ability.Strength => "SÍL",
+		Ability.Dexterity => "OBR",
+		Ability.Constitution => "ODO",
+		Ability.Intelligence => "INT",
+		Ability.Wisdom => "MOU",
+		Ability.Charisma => "CHA",
+		_ => ability.ToString()
+	};
+
+	private static string AncestryName(string id) => id switch
+	{
+		"human" => "Člověk",
+		"elf" => "Elf",
+		"dwarf" => "Trpaslík",
+		"halfling" => "Půlčík",
+		"half-orc" => "Půlork",
+		"gnome" => "Gnóm",
+		"dragonborn" => "Drakorozený",
+		"tiefling" => "Tiefling",
+		_ => id
+	};
+
+	private static string SubraceName(string id) => id switch
+	{
+		"wild" => "Divoký elf",
+		"high" => "Vznešený elf",
+		"night" => "Noční elf",
+		"blood" => "Krvavý elf",
+		"underground" => "Podzemní trpaslík",
+		"stone" => "Skalní trpaslík",
+		"light" => "Světlý trpaslík",
+		"fire" => "Ohnivý trpaslík",
+		_ => id
+	};
+
+	private static string ClassName(string id) => id switch
+	{
+		"alchemist" => "Alchymista",
+		"barbarian" => "Barbar",
+		"bard" => "Bard",
+		"fighter" => "Bojovník",
+		"sorcerer" => "Čaroděj",
+		"warlock" => "Černokněžník",
+		"druid" => "Druid",
+		"cleric" => "Klerik",
+		"wizard" => "Kouzelník",
+		"monster-hunter" => "Lovec netvorů",
+		"rogue" => "Tulák",
+		_ => id
+	};
+}
