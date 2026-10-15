@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../CharacterCreator.csproj" />
+    <ProjectReference Include="../CharacterCreator.Core/CharacterCreator.Core.csproj" />
   </ItemGroup>
 
 </Project>

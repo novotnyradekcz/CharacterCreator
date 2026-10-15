@@ -21,7 +21,7 @@ From the repository root:
 
 ```sh
 dotnet restore CharacterCreator.sln
-dotnet run --project CharacterCreator.Web/CharacterCreator.Web.csproj --urls http://localhost:5178
+dotnet run --project src/CharacterCreator.Web/CharacterCreator.Web.csproj --urls http://localhost:5178
 ```
 
 Open <http://localhost:5178>. If that port is already in use, change `5178` in the command and URL to another available port.
@@ -41,10 +41,22 @@ dotnet test CharacterCreator.sln
 
 ## Project layout
 
-- `Core/` contains the shared ability model, dice roller, JaD ruleset, and character-building service.
-- `CharacterCreator.Web/` contains the Blazor UI, Czech-facing labels, and application startup.
-- `CharacterCreator.Tests/` contains the xUnit test suite.
-- `CharacterCreator.sln` includes the core, web, and test projects.
+```text
+.
+├── src/
+│   ├── CharacterCreator.Core/
+│   │   ├── Ability.cs
+│   │   ├── CharacterBuildService.cs
+│   │   ├── DiceRollRule.cs
+│   │   ├── JaDRuleset.cs
+│   │   ├── RulesetModels.cs
+│   │   └── CharacterCreator.Core.csproj
+│   └── CharacterCreator.Web/    # Blazor UI and application startup
+├── tests/
+│   └── CharacterCreator.Tests/  # xUnit test suite
+├── CharacterCreator.sln
+└── README.md
+```
 
 The core uses English identifiers and the versioned ruleset ID `jad-v1`. Czech names are kept in the UI layer so additional rulesets or languages can reuse the same character model.
 
