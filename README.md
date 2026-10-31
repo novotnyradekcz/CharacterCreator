@@ -13,7 +13,7 @@ The current version focuses on JaD character creation. It does not save characte
 - Six ability-score rolls using 4d6, dropping the lowest die from each roll.
 - One-to-one assignment of the six results to the character's abilities. Equal totals remain separate rolls and can each be assigned once.
 - Ancestry and subrace bonuses, including choices such as a human's two +1 bonuses.
-- A final character sheet with base scores and applied bonuses.
+- The finish button brings the final character sheet into view, showing all six base scores, applied ancestry/subrace bonuses, final scores, and signed ability modifiers (`floor((final score - 10) / 2)`).
 
 ## Run locally
 

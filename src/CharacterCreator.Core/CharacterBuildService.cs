@@ -17,7 +17,11 @@ public sealed record CharacterSheet(
     string ClassId,
     IReadOnlyDictionary<Ability, int> BaseScores,
     IReadOnlyDictionary<Ability, int> Bonuses,
-    IReadOnlyDictionary<Ability, int> Scores);
+    IReadOnlyDictionary<Ability, int> Scores)
+{
+    public int GetAbilityModifier(Ability ability) =>
+        (int)Math.Floor((Scores[ability] - 10) / 2.0);
+}
 
 public sealed class CharacterBuildService(ICharacterRuleset ruleset)
 {

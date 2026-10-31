@@ -163,6 +163,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .score-card { min-width: 0; min-height: 103px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; border: 1px solid #cdd4c7; background: var(--white); }
 .score-label { color: var(--muted); font-size: 9px; font-weight: 700; text-align: center; }
 .score-card strong { color: var(--green-dark); font-family: var(--serif); font-size: 31px; font-weight: 500; line-height: 1; }
+.score-modifier { color: var(--green-dark); font-size: 12px; font-weight: 700; }
 .score-detail { color: var(--muted); font-size: 9px; }
 .score-detail span { color: var(--copper); font-weight: 700; }
 .text-button { padding: 5px 0; border: 0; color: var(--green-dark); background: transparent; font-size: 11px; font-weight: 700; text-decoration: underline; text-decoration-color: #a6b2a2; text-underline-offset: 3px; }

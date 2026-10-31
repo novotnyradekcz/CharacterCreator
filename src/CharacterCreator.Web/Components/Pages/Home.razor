@@ -231,7 +231,7 @@
 
 		@if (_sheet is not null)
 		{
-			<section class="character-sheet" aria-labelledby="sheet-heading" aria-live="polite">
+			<section class="character-sheet" aria-labelledby="sheet-heading" aria-live="polite" tabindex="-1" @ref="_sheetElement">
 				<div class="sheet-title">
 					<div>
 						<p class="eyebrow">Postava připravena</p>
@@ -247,6 +247,7 @@
 						<article class="score-card">
 							<span class="score-label">@AbilityName(ability)</span>
 							<strong>@_sheet.Scores[ability]</strong>
+							<span class="score-modifier">Oprava @_sheet.GetAbilityModifier(ability).ToString("+0;-0;0")</span>
 							<span class="score-detail">základ @_sheet.BaseScores[ability] @if (bonus > 0) { <span>· +@bonus</span> }</span>
 						</article>
 					}
@@ -273,7 +274,18 @@
 	private readonly Dictionary<Ability, int?> _assignments = Enum.GetValues<Ability>()
 		.ToDictionary(ability => ability, _ => (int?)null);
 	private CharacterSheet? _sheet;
+	private ElementReference _sheetElement;
+	private bool _focusSheet;
 	private string _screenReaderAnnouncement = string.Empty;
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (_focusSheet && _sheet is not null)
+		{
+			_focusSheet = false;
+			await _sheetElement.FocusAsync();
+		}
+	}
 
 	private AncestryDefinition? SelectedAncestry => Ruleset.Ancestries.FirstOrDefault(ancestry => ancestry.Id == _ancestryId);
 
@@ -432,6 +444,8 @@
 			_rolls,
 			_assignments.ToDictionary(assignment => assignment.Key, assignment => assignment.Value!.Value),
 			BonusChoices));
+		_focusSheet = true;
+		_screenReaderAnnouncement = "Postava je připravena. Přehled obsahuje konečné vlastnosti s rasovými bonusy a jejich opravy.";
 	}
 
 	private static string AbilityName(Ability ability) => ability switch

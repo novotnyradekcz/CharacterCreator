@@ -96,6 +96,66 @@ public class CharacterRulesTests
         Assert.Equal("jad-v1", sheet.RulesetId);
         Assert.Equal(14, sheet.Scores[Ability.Dexterity]);
         Assert.Equal(13, sheet.Scores[Ability.Charisma]);
+        Assert.Equal(2, sheet.GetAbilityModifier(Ability.Dexterity));
+        Assert.Equal(1, sheet.GetAbilityModifier(Ability.Charisma));
+    }
+
+    [Theory]
+    [InlineData(3, -4)]
+    [InlineData(8, -1)]
+    [InlineData(9, -1)]
+    [InlineData(10, 0)]
+    [InlineData(11, 0)]
+    [InlineData(12, 1)]
+    [InlineData(17, 3)]
+    [InlineData(18, 4)]
+    [InlineData(20, 5)]
+    public void AbilityModifiersRoundDownForFinalScores(int score, int expectedModifier)
+    {
+        var rolls = Enumerable.Range(0, 6)
+            .Select(id => new AbilityRoll(id, [], score))
+            .ToArray();
+        var assignments = Enum.GetValues<Ability>()
+            .Select((ability, id) => (ability, id))
+            .ToDictionary(item => item.ability, item => item.id);
+        var sheet = new CharacterBuildService(_ruleset).Build(new CharacterBuildRequest(
+            "Mira", "halfling", null, "bard", rolls, assignments, []));
+
+        Assert.Equal(expectedModifier, sheet.GetAbilityModifier(Ability.Strength));
+    }
+
+    [Theory]
+    [InlineData("elf", "blood", Ability.Intelligence,
+        new[] { 8, 11, 10, 12, 12, 13 }, new[] { -1, 0, 0, 1, 1, 1 })]
+    [InlineData("dwarf", "stone", Ability.Strength,
+        new[] { 10, 9, 12, 11, 12, 13 }, new[] { 0, -1, 1, 0, 1, 1 })]
+    [InlineData("human", null, Ability.Wisdom,
+        new[] { 9, 9, 10, 11, 13, 13 }, new[] { -1, -1, 0, 0, 1, 1 })]
+    public void BuildShowsAllFinalScoresAndModifiersWithFixedAndChosenBonuses(
+        string ancestryId, string? subraceId, Ability choice,
+        int[] expectedScores, int[] expectedModifiers)
+    {
+        var totals = new[] { 8, 9, 10, 11, 12, 13 };
+        var rolls = totals.Select((total, id) => new AbilityRoll(id, [], total)).ToArray();
+        var assignments = Enum.GetValues<Ability>()
+            .Select((ability, id) => (ability, id))
+            .ToDictionary(item => item.ability, item => item.id);
+        Ability[] choices = ancestryId switch
+        {
+            "elf" => [choice],
+            "human" => [Ability.Strength, choice],
+            _ => []
+        };
+        var sheet = new CharacterBuildService(_ruleset).Build(new CharacterBuildRequest(
+            "Mira", ancestryId, subraceId, "bard", rolls, assignments, choices));
+
+        Assert.Equal(6, sheet.Scores.Count);
+        foreach (var (ability, rollId) in assignments)
+        {
+            Assert.Equal(totals[rollId], sheet.BaseScores[ability]);
+            Assert.Equal(expectedScores[rollId], sheet.Scores[ability]);
+            Assert.Equal(expectedModifiers[rollId], sheet.GetAbilityModifier(ability));
+        }
     }
 
     private void AssertBonuses(
