@@ -6,6 +6,8 @@
 
 <PageTitle>Tvorba postavy | Jeskyně a draci</PageTitle>
 
+<div class="visually-hidden" role="status" aria-live="polite" aria-atomic="true">@_screenReaderAnnouncement</div>
+
 <div class="app-shell">
 	<header class="masthead">
 		<a class="brand" href="/" aria-label="Tvorba postavy, úvodní stránka">
@@ -157,7 +159,7 @@
 						{
 							<label class="assignment-row" for="score-@ability">
 								<span class="ability-name">@AbilityName(ability)</span>
-								<select id="score-@ability" class="score-select" @bind="_assignments[ability]" @bind:after="ClearBuild">
+								<select id="score-@ability" class="score-select" @bind="_assignments[ability]" @bind:after="OnAssignmentChanged">
 									<option value="">Hod</option>
 									@foreach (var roll in _rolls)
 									{
@@ -227,6 +229,7 @@
 	private readonly Dictionary<Ability, int?> _assignments = Enum.GetValues<Ability>()
 		.ToDictionary(ability => ability, _ => (int?)null);
 	private CharacterSheet? _sheet;
+	private string _screenReaderAnnouncement = string.Empty;
 
 	private AncestryDefinition? SelectedAncestry => Ruleset.Ancestries.FirstOrDefault(ancestry => ancestry.Id == _ancestryId);
 
@@ -312,6 +315,22 @@
 
 		_rolls = AbilityScoreRoller.Roll(Ruleset.AbilityScoreRule);
 		ClearRollsAssignments();
+		var results = string.Join(", ", _rolls.Select((roll, index) => $"hod {index + 1}: {roll.Total}"));
+		_screenReaderAnnouncement = $"Hody jsou připravené. {results}. Nyní přiřaď každý hod právě jednou.";
+	}
+
+	private void OnAssignmentChanged()
+	{
+		ClearBuild();
+		var assignedCount = _assignments.Values
+			.Where(value => value.HasValue)
+			.Select(value => value!.Value)
+			.Distinct()
+			.Count();
+
+		_screenReaderAnnouncement = assignedCount == _assignments.Count
+			? "Všechny hody jsou přiřazeny. Můžeš dokončit postavu."
+			: $"Přiřazeno {assignedCount} z {_assignments.Count} hodů.";
 	}
 
 	private void ClearRollsAssignments()
