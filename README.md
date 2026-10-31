@@ -1,4 +1,4 @@
-# Ateliér postav
+# Tvorba postavy
 
 A Czech-language character creator for **Jeskyně a draci (JaD)**, a tabletop role-playing game. Choose a character's ancestry and class, roll ability scores, assign the results, and see the final scores with ancestry bonuses applied.
 
