@@ -32,7 +32,7 @@ body {
 button, input, select { font: inherit; }
 button, select { cursor: pointer; }
 
-button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible {
+button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible, summary:focus-visible {
     outline: 3px solid var(--copper);
     outline-offset: 3px;
 }
@@ -85,6 +85,25 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .field-group { min-width: 0; }
 .subrace-field, .bonus-choice-group { margin-top: 19px; }
 .field-hint { margin: 8px 0 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+
+.selection-group { margin-top: 24px; }
+.selection-hint { margin: 0 0 12px; }
+.selection-accordion { border: 1px solid var(--line); border-radius: 2px; background: var(--white); }
+.selection-entry + .selection-entry { border-top: 1px solid var(--line); }
+.selection-entry summary { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 11px 13px; cursor: pointer; list-style: none; font-size: 13px; font-weight: 600; }
+.selection-entry summary::-webkit-details-marker { display: none; }
+.selection-entry summary::after { content: "+"; margin-left: auto; color: var(--green); font-size: 18px; font-weight: 400; }
+.selection-entry[open] summary::after { content: "-"; }
+.selection-entry summary:hover, .selection-entry.is-selected summary { color: var(--green-dark); background: #e6ece3; }
+.selection-badge { color: var(--green); font-size: 10px; font-weight: 700; }
+.selection-content { padding: 0 13px 16px; }
+.selection-content > p { margin: 12px 0; font-size: 12px; line-height: 1.65; }
+.selection-content .selection-bonuses { color: var(--green-dark); }
+.subrace-bonuses { margin: 8px 0 12px; padding-left: 18px; font-size: 11px; line-height: 1.65; }
+.subrace-bonuses li + li { margin-top: 4px; }
+.selection-content .rulebook-source { color: var(--muted); font-size: 10px; }
+.selection-button { min-height: 40px; padding: 8px 14px; border: 1px solid var(--green); border-radius: 2px; color: var(--green-dark); background: transparent; font-size: 12px; font-weight: 700; }
+.selection-button:hover, .selection-button[aria-pressed="true"] { color: white; background: var(--green-dark); }
 
 .bonus-preview { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 25px; padding-top: 16px; border-top: 1px solid var(--line); }
 .preview-label { margin-right: 4px; color: var(--muted); font-size: 11px; }

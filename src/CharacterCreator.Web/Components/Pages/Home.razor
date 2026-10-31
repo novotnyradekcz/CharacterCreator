@@ -37,28 +37,44 @@
 				<label class="field-label" for="character-name">Jméno postavy</label>
 				<input id="character-name" class="text-field" @bind="_name" @bind:event="oninput" @bind:after="ClearBuild" maxlength="48" placeholder="Například Mira" autocomplete="off" />
 
-				<div class="field-row">
-					<div class="field-group">
-						<label class="field-label" for="ancestry">Rasa</label>
-						<select id="ancestry" class="select-field" @bind="_ancestryId" @bind:after="OnAncestryChanged">
-							<option value="">Vyber rasu</option>
-							@foreach (var ancestry in Ruleset.Ancestries)
-							{
-								<option value="@ancestry.Id">@AncestryName(ancestry.Id)</option>
-							}
-						</select>
+				<section class="selection-group" aria-labelledby="ancestry-heading">
+					<h3 id="ancestry-heading" class="field-label">Rasa</h3>
+					<p class="field-hint selection-hint">Rozbal rasu, přečti si o ní a potvrď svůj výběr.</p>
+					<div class="selection-accordion">
+						@foreach (var ancestry in Ruleset.Ancestries)
+						{
+							var selected = ancestry.Id == _ancestryId;
+							var info = AncestryInfo(ancestry.Id);
+							<details @key="ancestry.Id" name="ancestry" class="selection-entry @(selected ? "is-selected" : null)">
+								<summary>
+									<span>@AncestryName(ancestry.Id)</span>
+									@if (selected)
+									{
+										<span class="selection-badge">Vybráno</span>
+									}
+								</summary>
+								<div class="selection-content">
+									<p>@info.Description</p>
+									<p class="selection-bonuses"><strong>Bonusy vlastností:</strong> @BonusDescription(ancestry.Bonuses, ancestry.ChoiceRule)</p>
+									@if (ancestry.Subraces.Count > 0)
+									{
+										<p class="field-hint">K základnímu bonusu se přičítá bonus zvoleného rodu:</p>
+										<ul class="subrace-bonuses">
+											@foreach (var subrace in ancestry.Subraces)
+											{
+												<li><strong>@SubraceName(subrace.Id):</strong> @BonusDescription(subrace.Bonuses, subrace.ChoiceRule)</li>
+											}
+										</ul>
+									}
+									<p class="rulebook-source">JaD 1.3.3 · Rasy, s. @info.Page</p>
+									<button type="button" class="selection-button" aria-pressed="@(selected ? "true" : "false")" aria-label="@($"Zvolit rasu: {AncestryName(ancestry.Id)}")" @onclick="() => SelectAncestry(ancestry.Id)">
+										@(selected ? "Vybraná rasa" : "Zvolit rasu")
+									</button>
+								</div>
+							</details>
+						}
 					</div>
-					<div class="field-group">
-						<label class="field-label" for="character-class">Povolání</label>
-						<select id="character-class" class="select-field" @bind="_classId" @bind:after="ClearBuild">
-							<option value="">Vyber povolání</option>
-							@foreach (var characterClass in Ruleset.Classes)
-							{
-								<option value="@characterClass.Id">@ClassName(characterClass.Id)</option>
-							}
-						</select>
-					</div>
-				</div>
+				</section>
 
 				@if (SelectedAncestry?.Subraces.Count > 0)
 				{
@@ -106,6 +122,34 @@
 						<p class="field-hint">Každý bonus musí připadnout na jinou vlastnost.</p>
 					</div>
 				}
+
+				<section class="selection-group" aria-labelledby="class-heading">
+					<h3 id="class-heading" class="field-label">Povolání</h3>
+					<p class="field-hint selection-hint">Rozbal povolání a vyber, jakou cestou se vydáš.</p>
+					<div class="selection-accordion">
+						@foreach (var characterClass in Ruleset.Classes)
+						{
+							var selected = characterClass.Id == _classId;
+							var info = ClassInfo(characterClass.Id);
+							<details @key="characterClass.Id" name="character-class" class="selection-entry @(selected ? "is-selected" : null)">
+								<summary>
+									<span>@ClassName(characterClass.Id)</span>
+									@if (selected)
+									{
+										<span class="selection-badge">Vybráno</span>
+									}
+								</summary>
+								<div class="selection-content">
+									<p>@info.Description</p>
+									<p class="rulebook-source">JaD 1.3.3 · Povolání, s. @info.Page</p>
+									<button type="button" class="selection-button" aria-pressed="@(selected ? "true" : "false")" aria-label="@($"Zvolit povolání: {ClassName(characterClass.Id)}")" @onclick="() => SelectClass(characterClass.Id)">
+										@(selected ? "Vybrané povolání" : "Zvolit povolání")
+									</button>
+								</div>
+							</details>
+						}
+					</div>
+				</section>
 
 				@if (HasValidSelections)
 				{
@@ -278,6 +322,30 @@
 		_assignments.Values.All(value => value.HasValue) &&
 		_assignments.Values.Distinct().Count() == _assignments.Count;
 
+	private void SelectAncestry(string id)
+	{
+		if (_ancestryId == id)
+		{
+			return;
+		}
+
+		_ancestryId = id;
+		OnAncestryChanged();
+		_screenReaderAnnouncement = $"Vybraná rasa: {AncestryName(id)}.";
+	}
+
+	private void SelectClass(string id)
+	{
+		if (_classId == id)
+		{
+			return;
+		}
+
+		_classId = id;
+		ClearBuild();
+		_screenReaderAnnouncement = $"Vybrané povolání: {ClassName(id)}.";
+	}
+
 	private void OnAncestryChanged()
 	{
 		_subraceId = null;
@@ -386,6 +454,51 @@
 		Ability.Wisdom => "MOU",
 		Ability.Charisma => "CHA",
 		_ => ability.ToString()
+	};
+
+	private static string BonusDescription(IReadOnlyDictionary<Ability, int> bonuses, AbilityChoiceRule? choiceRule)
+	{
+		var parts = bonuses.OrderBy(pair => pair.Key)
+			.Select(pair => $"{AbilityName(pair.Key)} +{pair.Value}")
+			.ToList();
+
+		if (choiceRule is not null)
+		{
+			parts.Add(choiceRule.Count > 1
+				? $"+1 ke každé ze {choiceRule.Count} různých vlastností podle volby"
+				: $"+1 k jedné z vlastností: {string.Join(" nebo ", choiceRule.AllowedAbilities.Select(AbilityName))}");
+		}
+
+		return string.Join("; ", parts);
+	}
+
+	private static (string Description, string Page) AncestryInfo(string id) => id switch
+	{
+		"human" => ("Všestranní lidé se mohou vydat cestou kteréhokoli povolání. Jejich síla spočívá ve společnosti, vlastních ambicích a schopnosti překonat své slabosti.", "58–61"),
+		"elf" => ("Elfové mají vílí kořeny, silné emoce a blízký vztah k prostředí, z něhož pocházejí. Jsou obratní, nadaní pro magii a místo běžného spánku prožívají své vzpomínky v transu.", "63–69"),
+		"dwarf" => ("Houževnatí trpaslíci jsou spjati se zemí, svým klanem a řemeslem. Cení si trvalých výtvorů a souladu slov s činy; jejich rod určuje další nadání i mystický pohled na svět.", "71–78"),
+		"halfling" => ("Malí a obratní půlčíci si cení dobrého jídla a společnosti. Na dobrodružstvích jim pomáhá štěstí, odvaha a schopnost nenápadně se pohybovat mezi většími tvory.", "79–81"),
+		"half-orc" => ("Půlorkové spojují lidské ambice s orčí silou a vytrvalostí. Bývají temperamentní a hrdí; v nebezpečí se mohou opřít o mimořádnou houževnatost a prudké útoky.", "82–84"),
+		"gnome" => ("Zvídaví gnómové mají spoustu energie a talent pro techniku i řemesla. Rádi zkoumají a vylepšují svět kolem sebe, staví mechanické hříčky a umějí odolávat magii působící na mysl.", "85–88"),
+		"dragonborn" => ("Drakorození nesou vzhled i dědictví dračích předků: šupiny, mohutnou postavu a ničivý dech. Jejich život často určují čest, povinnost a hrdost; dračí původ ovlivňuje dech i odolnost.", "89–91"),
+		"tiefling" => ("Rohy a ocas připomínají temný původ tieflingů, nikoli nutně jejich vlastní povahu. Jsou působiví a duševně nadaní; pekelné dědictví jim dává vrozenou magii a odolnost vůči ohni.", "92–94"),
+		_ => throw new ArgumentOutOfRangeException(nameof(id), id, "Missing ancestry description.")
+	};
+
+	private static (string Description, string Page) ClassInfo(string id) => id switch
+	{
+		"alchemist" => ("Alchymista zkoumá přírodu i magii a mění své poznatky v lektvary, nástroje a magické vynálezy. Družině pomáhá důmyslnou výbavou a praktickým využitím svých znalostí.", "98"),
+		"barbarian" => ("Barbar se v boji opírá o instinkty, zuřivost a mimořádnou výdrž. Hodí se do první linie i do divočiny a nemusí pocházet jen z kmenové společnosti.", "110"),
+		"bard" => ("Bard propojuje umění s magií: slovy, hudbou či výjevy inspiruje spojence a ovlivňuje ostatní. Je všestranný dobrodruh, který vedle kouzel využívá společenské nadání a pestré dovednosti.", "117"),
+		"fighter" => ("Bojovník si z boje udělal řemeslo a ovládá zbraně, výstroj i vytříbené techniky. Na bojišti spoléhá na výcvik, rychlý úsudek a schopnost zachovat přehled i pod tlakem.", "123"),
+		"sorcerer" => ("Čaroděj má magii vrozenou díky neobvyklému původu či nadpřirozenému dědictví. Jeho kouzla nejsou výsledkem studia, ale přirozeným projevem moci, která je součástí jeho bytosti.", "135"),
+		"warlock" => ("Černokněžník získává kouzla a zvláštní schopnosti prostřednictvím paktu s mocným nadpřirozeným patronem. Za propůjčenou moc přijímá závazky a vládne magií odlišnou od ostatních sesilatelů.", "143"),
+		"druid" => ("Druid rozumí přírodní magii a cyklům života. Může chránit mystická místa, léčit a sesílat přírodní kouzla; své spojení se zvířaty využívá také k proměně do jejich podoby.", "155"),
+		"cleric" => ("Klerik je vyvolený služebník božstva, který svou vírou získává moc konat zázraky. Léčí, čelí nemrtvým a brání posvátné věci nejen kouzly, ale i slovem a zbraní.", "162"),
+		"wizard" => ("Kouzelník získává magickou moc studiem, pokusy a porozuměním silám světa. Nabízí široký výběr kouzel, která shromažďuje v grimoáru; jeho všestrannost však vyžaduje přípravu.", "169"),
+		"monster-hunter" => ("Lovec netvorů obrací spoutanou temnotu proti příšerám a nadpřirozenému zlu. Kombinuje bojový výcvik a znalosti nepřátel se zakletími a nebezpečnými rituály.", "176"),
+		"rogue" => ("Tulák spoléhá na důvtip, pohotovost a pečlivě vypilované dovednosti. Poradí si s překážkami, nenápadným pronikáním i přesnými útoky; nemusí přitom být zločincem.", "188"),
+		_ => throw new ArgumentOutOfRangeException(nameof(id), id, "Missing class description.")
 	};
 
 	private static string AncestryName(string id) => id switch
