@@ -9,9 +9,11 @@ The current version focuses on JaD character creation. It does not save characte
 - Czech-language character creation for JaD.
 - The documented JaD ancestry, subrace, and class options.
 - Separate ancestry and class accordions with keyboard-accessible expandable entries and explicit selection buttons. Browsing an entry does not change the character.
+- Species with subraces offer individual subrace buttons inside their accordion card; choosing one selects both the species and its subrace.
 - Brief Czech summaries paraphrased from the JaD 1.3.3 rulebook (chapter 3, **Rasy**, pp. 58–94; chapter 4, **Povolání**, pp. 98–188), with printed-page references and ancestry/subrace ability bonuses drawn from the ruleset.
 - Six ability-score rolls using 4d6, dropping the lowest die from each roll.
 - One-to-one assignment of the six results to the character's abilities. Equal totals remain separate rolls and can each be assigned once.
+- Drag scores from the pool on the right onto abilities on the left, or select a score and then an ability using click, tap, or keyboard. Assigned scores can be moved or returned to the pool. Dropping onto an occupied ability swaps assigned scores, or returns the previous score to the pool if the new score came from there.
 - Ancestry and subrace bonuses, including choices such as a human's two +1 bonuses.
 - The finish button brings the final character sheet into view, showing all six base scores, applied ancestry/subrace bonuses, final scores, and signed ability modifiers (`floor((final score - 10) / 2)`).
 

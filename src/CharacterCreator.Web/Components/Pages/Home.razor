@@ -50,7 +50,7 @@
 									<span>@AncestryName(ancestry.Id)</span>
 									@if (selected)
 									{
-										<span class="selection-badge">Vybráno</span>
+										<span class="selection-badge">@(SelectedSubraceName ?? "Vybráno")</span>
 									}
 								</summary>
 								<div class="selection-content">
@@ -67,28 +67,28 @@
 										</ul>
 									}
 									<p class="rulebook-source">JaD 1.3.3 · Rasy, s. @info.Page</p>
-									<button type="button" class="selection-button" aria-pressed="@(selected ? "true" : "false")" aria-label="@($"Zvolit rasu: {AncestryName(ancestry.Id)}")" @onclick="() => SelectAncestry(ancestry.Id)">
-										@(selected ? "Vybraná rasa" : "Zvolit rasu")
-									</button>
+									@if (ancestry.Subraces.Count > 0)
+									{
+										<div class="subrace-buttons" aria-label="Podoba rodu">
+											@foreach (var subrace in ancestry.Subraces)
+											{
+												<button type="button" class="selection-button" aria-pressed="@(selected && _subraceId == subrace.Id ? "true" : "false")" @onclick="() => SelectAncestry(ancestry.Id, subrace.Id)">
+													@SubraceName(subrace.Id)
+												</button>
+											}
+										</div>
+									}
+									else
+									{
+										<button type="button" class="selection-button" aria-pressed="@(selected ? "true" : "false")" aria-label="@($"Zvolit rasu: {AncestryName(ancestry.Id)}")" @onclick="() => SelectAncestry(ancestry.Id)">
+											@(selected ? "Vybraná rasa" : "Zvolit rasu")
+										</button>
+									}
 								</div>
 							</details>
 						}
 					</div>
 				</section>
-
-				@if (SelectedAncestry?.Subraces.Count > 0)
-				{
-					<div class="field-group subrace-field">
-						<label class="field-label" for="subrace">Podoba rodu</label>
-						<select id="subrace" class="select-field" @bind="_subraceId" @bind:after="OnSubraceChanged">
-							<option value="">Vyber podrasu</option>
-							@foreach (var subrace in SelectedAncestry.Subraces)
-							{
-								<option value="@subrace.Id">@SubraceName(subrace.Id)</option>
-							}
-						</select>
-					</div>
-				}
 
 				@if (ChoiceRule is { } choiceRule)
 				{
@@ -179,39 +179,61 @@
 
 				@if (_rolls.Count > 0)
 				{
-					<div class="roll-results" aria-label="Výsledky hodů">
-						@foreach (var roll in _rolls)
-						{
-							<article class="roll-result" aria-label="Hod @roll.Total">
-								<div class="dice-row" aria-label="Kostky: @string.Join(", ", roll.Dice)">
-									@for (var dieIndex = 0; dieIndex < roll.Dice.Count; dieIndex++)
-									{
-										<span class="die @(IsDroppedDie(roll, dieIndex) ? "die-dropped" : null)">@roll.Dice[dieIndex]</span>
-									}
-								</div>
-								<span class="roll-total">@roll.Total</span>
-							</article>
-						}
-					</div>
-
 					<div class="assignment-heading">
 						<span class="mini-rule"></span>
 						<p>Přiřaď každý hod právě jednou</p>
 					</div>
-					<div class="assignment-list">
-						@foreach (var ability in Enum.GetValues<Ability>())
-						{
-							<label class="assignment-row" for="score-@ability">
-								<span class="ability-name">@AbilityName(ability)</span>
-								<select id="score-@ability" class="score-select" @bind="_assignments[ability]" @bind:after="OnAssignmentChanged">
-									<option value="">Hod</option>
-									@foreach (var roll in _rolls)
+					<p id="assignment-help" class="field-hint">Přetáhni hod zprava na vlastnost vlevo, nebo klikni na hod a potom na vlastnost. Obsazené hody se vymění. Hod můžeš vrátit do zásoby.</p>
+					<div class="score-workspace" aria-describedby="assignment-help">
+						<div class="assignment-list" aria-label="Vlastnosti">
+							@foreach (var ability in Enum.GetValues<Ability>())
+							{
+								var roll = AssignedRoll(ability);
+								<div class="assignment-row">
+									<button id="score-@ability" type="button" class="ability-target @(_selectedRollId.HasValue || _draggedRollId.HasValue ? "is-ready" : null)"
+										draggable="@(roll is not null ? "true" : "false")"
+										aria-label="@($"{AbilityName(ability)}: {(roll is null ? "nepřiřazeno" : $"hod {roll.Id + 1}, {roll.Total}")}")"
+										aria-pressed="@(_selectedRollId.HasValue && _selectedRollId == roll?.Id ? "true" : "false")"
+										@onclick="() => ActivateAbility(ability)"
+										@ondragstart="() => StartDrag(roll?.Id)" @ondragend="EndDrag"
+										@ondragover:preventDefault @ondrop:preventDefault @ondrop="() => DropOnAbility(ability)">
+										<span class="ability-name">@AbilityName(ability)</span>
+										<span class="assigned-total">@(roll is null ? "—" : roll.Total.ToString())</span>
+									</button>
+									@if (roll is not null)
 									{
-										<option value="@roll.Id" disabled="@IsRollUsedElsewhere(ability, roll.Id)">@roll.Total</option>
+										<button type="button" class="remove-score" aria-label="@($"Vrátit hod z vlastnosti {AbilityName(ability)}")" @onclick="() => ReturnRoll(roll.Id)">×</button>
 									}
-								</select>
-							</label>
-						}
+								</div>
+							}
+						</div>
+						<div class="score-pool" aria-label="Zásoba hodů" @ondragover:preventDefault @ondrop:preventDefault @ondrop="DropOnPool">
+							<p class="field-label">Hody k přiřazení</p>
+							@foreach (var roll in _rolls.Where(roll => !_assignments.Values.Contains(roll.Id)))
+							{
+								<button @key="roll.Id" type="button" class="roll-result @(_selectedRollId == roll.Id ? "is-active" : null)" data-roll-id="@roll.Id"
+									draggable="true" aria-label="@($"Hod {roll.Id + 1}: {roll.Total}")" aria-pressed="@(_selectedRollId == roll.Id ? "true" : "false")"
+									@onclick="() => SelectRoll(roll.Id)" @ondragstart="() => StartDrag(roll.Id)" @ondragend="EndDrag">
+									<span class="roll-number">Hod @(roll.Id + 1)</span>
+									<span class="dice-row" aria-label="Kostky: @string.Join(", ", roll.Dice)">
+										@for (var dieIndex = 0; dieIndex < roll.Dice.Count; dieIndex++)
+										{
+											<span class="die @(IsDroppedDie(roll, dieIndex) ? "die-dropped" : null)">@roll.Dice[dieIndex]</span>
+										}
+									</span>
+									<span class="roll-total">@roll.Total</span>
+								</button>
+							}
+							@if (_assignments.Values.All(value => value.HasValue))
+							{
+								<p class="field-hint">Všechny hody jsou přiřazeny.</p>
+							}
+							@if (_selectedRollId is { } selectedRollId)
+							{
+								<button type="button" class="text-button" @onclick="() => ReturnRoll(selectedRollId)">Vrátit vybraný hod</button>
+								<button type="button" class="text-button" @onclick="CancelSelection">Zrušit výběr</button>
+							}
+						</div>
 					</div>
 
 					@if (CanBuild)
@@ -271,6 +293,8 @@
 	private Ability? _bonusChoiceOne;
 	private Ability? _bonusChoiceTwo;
 	private IReadOnlyList<AbilityRoll> _rolls = [];
+	private int? _selectedRollId;
+	private int? _draggedRollId;
 	private readonly Dictionary<Ability, int?> _assignments = Enum.GetValues<Ability>()
 		.ToDictionary(ability => ability, _ => (int?)null);
 	private CharacterSheet? _sheet;
@@ -334,16 +358,19 @@
 		_assignments.Values.All(value => value.HasValue) &&
 		_assignments.Values.Distinct().Count() == _assignments.Count;
 
-	private void SelectAncestry(string id)
+	private void SelectAncestry(string id, string? subraceId = null)
 	{
-		if (_ancestryId == id)
+		if (_ancestryId == id && _subraceId == subraceId)
 		{
 			return;
 		}
 
 		_ancestryId = id;
-		OnAncestryChanged();
-		_screenReaderAnnouncement = $"Vybraná rasa: {AncestryName(id)}.";
+		_subraceId = subraceId;
+		_bonusChoiceOne = null;
+		_bonusChoiceTwo = null;
+		ClearRolls();
+		_screenReaderAnnouncement = $"Vybraná rasa: {AncestryName(id)}{(subraceId is null ? "" : $", {SubraceName(subraceId)}")}.";
 	}
 
 	private void SelectClass(string id)
@@ -358,26 +385,13 @@
 		_screenReaderAnnouncement = $"Vybrané povolání: {ClassName(id)}.";
 	}
 
-	private void OnAncestryChanged()
-	{
-		_subraceId = null;
-		_bonusChoiceOne = null;
-		_bonusChoiceTwo = null;
-		ClearRolls();
-	}
-
-	private void OnSubraceChanged()
-	{
-		_bonusChoiceOne = null;
-		_bonusChoiceTwo = null;
-		ClearRolls();
-	}
-
 	private void ClearBuild() => _sheet = null;
 
 	private void ClearRolls()
 	{
 		_rolls = [];
+		_selectedRollId = null;
+		_draggedRollId = null;
 		foreach (var ability in Enum.GetValues<Ability>())
 		{
 			_assignments[ability] = null;
@@ -415,6 +429,8 @@
 
 	private void ClearRollsAssignments()
 	{
+		_selectedRollId = null;
+		_draggedRollId = null;
 		foreach (var ability in Enum.GetValues<Ability>())
 		{
 			_assignments[ability] = null;
@@ -426,8 +442,98 @@
 	private bool IsDroppedDie(AbilityRoll roll, int dieIndex) =>
 		dieIndex == roll.Dice.ToList().IndexOf(roll.Dice.Min());
 
-	private bool IsRollUsedElsewhere(Ability ability, int rollId) =>
-		_assignments.Any(assignment => assignment.Key != ability && assignment.Value == rollId);
+	private AbilityRoll? AssignedRoll(Ability ability) =>
+		_rolls.FirstOrDefault(roll => roll.Id == _assignments[ability]);
+
+	private void SelectRoll(int rollId)
+	{
+		_selectedRollId = _selectedRollId == rollId ? null : rollId;
+		_screenReaderAnnouncement = _selectedRollId.HasValue
+			? $"Vybrán hod {rollId + 1}. Vyber vlastnost, které ho přiřadíš."
+			: "Výběr hodu zrušen.";
+	}
+
+	private void CancelSelection()
+	{
+		_selectedRollId = null;
+		_screenReaderAnnouncement = "Výběr hodu zrušen.";
+	}
+
+	private void StartDrag(int? rollId) => _draggedRollId = rollId;
+
+	private void EndDrag() => _draggedRollId = null;
+
+	private void ActivateAbility(Ability ability)
+	{
+		if (_selectedRollId is { } rollId)
+		{
+			AssignRoll(ability, rollId);
+		}
+		else if (_assignments[ability] is { } assignedId)
+		{
+			SelectRoll(assignedId);
+		}
+		else
+		{
+			_screenReaderAnnouncement = "Nejdřív vyber hod ze zásoby vpravo.";
+		}
+	}
+
+	private void DropOnAbility(Ability ability)
+	{
+		if (_draggedRollId is { } rollId)
+		{
+			AssignRoll(ability, rollId);
+		}
+	}
+
+	private void AssignRoll(Ability ability, int rollId)
+	{
+		var previousRollId = _assignments[ability];
+		if (previousRollId == rollId)
+		{
+			_draggedRollId = null;
+			CancelSelection();
+			return;
+		}
+
+		foreach (var source in Enum.GetValues<Ability>())
+		{
+			if (_assignments[source] == rollId)
+			{
+				_assignments[source] = previousRollId;
+				break;
+			}
+		}
+
+		_assignments[ability] = rollId;
+		_selectedRollId = null;
+		_draggedRollId = null;
+		OnAssignmentChanged();
+	}
+
+	private void ReturnRoll(int rollId)
+	{
+		foreach (var ability in Enum.GetValues<Ability>())
+		{
+			if (_assignments[ability] == rollId)
+			{
+				_assignments[ability] = null;
+			}
+		}
+
+		_selectedRollId = null;
+		_draggedRollId = null;
+		OnAssignmentChanged();
+	}
+
+	private void DropOnPool()
+	{
+		if (_draggedRollId is { } rollId)
+		{
+			ReturnRoll(rollId);
+		}
+	}
 
 	private void BuildCharacter()
 	{
